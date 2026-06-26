@@ -57,8 +57,8 @@ const TABS = [
 ];
 
 export default function HomeHero() {
-  const [active, setActive] = useState(0);
-  const current = TABS[active];
+  // Background image stays on the first service (tabs ko hero se hata diya tha).
+  const [active] = useState(0);
 
   return (
     <section className="relative overflow-hidden bg-[#122734] text-frost-50">
@@ -104,13 +104,13 @@ export default function HomeHero() {
 
           <div className="animate-rise delay-5 mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
-              href="/login"
+              href="/register"
               className="rounded-full bg-marigold px-7 py-3.5 text-center text-base font-semibold text-lagoon-900 shadow-[0_12px_30px_-12px_rgba(243,196,59,0.6)] transition-transform hover:-translate-y-0.5 hover:bg-marigold-600"
             >
-              Start free
+              Get started
             </Link>
             <Link
-              href="#services"
+              href="/services"
               className="rounded-full border border-frost/30 px-7 py-3.5 text-center text-base font-semibold text-frost-50 transition-colors hover:bg-white/5"
             >
               Explore services
