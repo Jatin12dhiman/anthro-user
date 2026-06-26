@@ -4,26 +4,26 @@ const TESTIMONIALS = [
   {
     quote:
       "I published my first peer-reviewed blog and the citation tool saved me hours. My profile is now the first thing I share with supervisors.",
-    name: "Aarav Mehta",
-    role: "PhD candidate · Genomics",
+    name: "Dr. Aarav Mehta",
+    role: "Professor of Genomics · Indian Institute of Science",
   },
   {
     quote:
       "Booking a mentor took two minutes and the session link was waiting in my profile. The cohort course got me to submission.",
     name: "Dr. Neha Rao",
-    role: "Mentor · Public Health",
+    role: "Associate Professor · Public Health Foundation of India",
   },
   {
     quote:
       "The competition leaderboard kept me motivated, and winning got my essay onto the main blog. The certificate is verifiable too.",
-    name: "Saanvi Iyer",
-    role: "Undergraduate · Economics",
+    name: "Prof. Saanvi Iyer",
+    role: "Dean of Social Sciences · Delhi University",
   },
 ];
 
 export default function HomeTestimonials() {
   return (
-    <section className="bg-background py-24 sm:py-32">
+    <section className="bg-background pt-12 pb-24 sm:pt-14 sm:pb-32">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="max-w-2xl">
           <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-moss">

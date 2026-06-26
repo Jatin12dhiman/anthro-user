@@ -19,13 +19,37 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // On mount — check if cookie session is alive
+  // On mount — check if cookie session is alive, with silent refresh fallback
   useEffect(() => {
-    fetch(`${API}/auth/me`, { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => setUser(data?.user ?? null))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+    const initAuth = async () => {
+      try {
+        let res = await fetch(`${API}/auth/me`, { credentials: "include" });
+        if (res.status === 401) {
+          // Access token expired, try to silently refresh session cookies
+          const refreshRes = await fetch(`${API}/auth/refresh`, {
+            method: "POST",
+            credentials: "include",
+          });
+          if (refreshRes.ok) {
+            // Retry /me with the newly refreshed access token
+            res = await fetch(`${API}/auth/me`, { credentials: "include" });
+          }
+        }
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data?.user ?? null);
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        console.error("Auth provider mount initialization failed:", err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
   const logout = useCallback(async () => {

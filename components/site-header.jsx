@@ -6,7 +6,7 @@ import { useAuth } from "@/context/auth-context";
 
 const NAV = [
   { label: "Services", href: "/services" },
-  { label: "Blog", href: "/blog" },
+  { label: "Blogs", href: "/blog" },
   { label: "Mentoring", href: "/mentoring" },
   { label: "Projects", href: "/projects" },
   { label: "Competitions", href: "/competition" },
@@ -44,8 +44,8 @@ function Avatar({ name, size = 32 }) {
     : "?";
   return (
     <span
-      style={{ width: size, height: size, fontSize: size * 0.38 }}
-      className="inline-flex items-center justify-center rounded-full bg-moss/80 font-semibold text-frost-50 select-none shrink-0"
+      style={{ width: size, height: size, fontSize: size * 0.36 }}
+      className="inline-flex items-center justify-center rounded-full bg-gradient-to-tr from-moss to-lagoon font-display font-bold text-frost-50 select-none shrink-0 shadow-sm border border-white/15"
     >
       {initials}
     </span>
@@ -74,12 +74,12 @@ function UserMenu({ user, onLogout }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2.5 rounded-full border border-frost/20 bg-white/8 px-3 py-1.5 text-sm font-medium text-frost-50 backdrop-blur-sm transition-all hover:bg-white/14 hover:border-frost/35"
+        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] pl-1.5 pr-3.5 py-1 text-sm font-semibold text-frost-50 shadow-[0_4px_12px_rgba(0,0,0,0.08)] backdrop-blur-md transition-all duration-300 hover:bg-white/[0.08] hover:border-white/20 hover:shadow-[0_8px_20px_rgba(0,0,0,0.16)] hover:-translate-y-0.5 active:scale-98"
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <Avatar name={user.name} size={26} />
-        <span className="max-w-[100px] truncate">{firstName}</span>
+        <Avatar name={user.name} size={28} />
+        <span className="max-w-[100px] truncate tracking-wide">{firstName}</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="14"
@@ -87,10 +87,10 @@ function UserMenu({ user, onLogout }) {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="2.2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`shrink-0 text-frost/60 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-frost/50 transition-transform duration-250 ${open ? "rotate-180 text-frost-50" : ""}`}
           aria-hidden="true"
         >
           <path d="m6 9 6 6 6-6" />
@@ -98,7 +98,7 @@ function UserMenu({ user, onLogout }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2.5 w-60 rounded-2xl border border-white/10 bg-lagoon-900/95 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.7)] backdrop-blur-xl overflow-hidden">
+        <div className="absolute right-0 top-full mt-2.5 w-60 rounded-2xl border border-white/10 bg-lagoon-900/90 shadow-[0_24px_64px_-16px_rgba(0,0,0,0.5)] backdrop-blur-2xl overflow-hidden">
           {/* User info */}
           <div className="flex items-center gap-3 px-4 py-4 border-b border-white/8">
             <Avatar name={user.name} size={38} />
@@ -182,11 +182,10 @@ export default function SiteHeader() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled
           ? "bg-lagoon-900/90 backdrop-blur-md shadow-[0_10px_40px_-20px_rgba(0,0,0,0.6)]"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <nav className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
         <Link
@@ -240,9 +239,8 @@ export default function SiteHeader() {
 
       {/* Mobile sheet */}
       <div
-        className={`overflow-hidden border-t border-white/10 bg-lagoon-900 lg:hidden ${
-          mobileOpen ? "max-h-[30rem]" : "max-h-0"
-        } transition-[max-height] duration-300 ease-in-out`}
+        className={`overflow-hidden border-t border-white/10 bg-lagoon-900 lg:hidden ${mobileOpen ? "max-h-[30rem]" : "max-h-0"
+          } transition-[max-height] duration-300 ease-in-out`}
       >
         <ul className="flex flex-col gap-1 px-5 py-4">
           {NAV.map((item) => (

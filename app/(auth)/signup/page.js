@@ -39,7 +39,7 @@ export default function SignupPage() {
             “Anthroplanet is now the first thing I share with supervisors.”
           </blockquote>
           <figcaption className="mt-3 font-mono text-xs uppercase tracking-wide text-frost/50">
-            Aarav Mehta · PhD candidate
+            Dr. Aarav Mehta · Professor
           </figcaption>
         </figure>
       </aside>

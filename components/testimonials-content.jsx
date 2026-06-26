@@ -4,18 +4,18 @@ import StarRating from "@/components/star-rating";
 const FEATURED = {
   quote:
     "Anthroplanet changed how I share my work. My profile is the first link in every email to a supervisor, and the citation tools alone saved me weeks across my thesis.",
-  name: "Aarav Mehta",
-  role: "PhD candidate · Genomics, IIT Delhi",
+  name: "Dr. Aarav Mehta",
+  role: "Professor of Genomics · Indian Institute of Science",
   img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
 };
 
 const TESTIMONIALS = [
-  { quote: "Booking a mentor took two minutes and the cohort course got me to submission. Worth every rupee.", name: "Dr. Neha Rao", role: "Mentor · Public Health" },
-  { quote: "The competition leaderboard kept me motivated, and winning got my essay onto the main blog.", name: "Saanvi Iyer", role: "Undergraduate · Economics" },
-  { quote: "Content Transformation turned my dense manuscript into a clean abstract and a thread. Game changer.", name: "Rohan Das", role: "Researcher · Materials Science" },
-  { quote: "I found two co-authors through the collaboration hub. The matching by research tags actually works.", name: "Priya Nair", role: "PhD · Climate Science" },
-  { quote: "As a mentor, the auto-scheduled video links and commission tracking just work. No admin headaches.", name: "Dr. Imran Khan", role: "Mentor · Data Science" },
-  { quote: "My Impact Score gave my CV a story numbers alone never could. Recruiters notice it.", name: "Ananya Gupta", role: "Postdoc · Neuroscience" },
+  { quote: "Booking a mentor took two minutes and the cohort course got me to submission. Worth every rupee.", name: "Dr. Neha Rao", role: "Associate Professor · Public Health Foundation of India" },
+  { quote: "The competition leaderboard kept me motivated, and winning got my essay onto the main blog.", name: "Prof. Saanvi Iyer", role: "Dean of Social Sciences · Delhi University" },
+  { quote: "Content Transformation turned my dense manuscript into a clean abstract and a thread. Game changer.", name: "Dr. Rohan Das", role: "Principal Investigator · IIT Madras" },
+  { quote: "I found two co-authors through the collaboration hub. The matching by research tags actually works.", name: "Prof. Priya Nair", role: "Professor of Climatology · IISER Pune" },
+  { quote: "As a mentor, the auto-scheduled video links and commission tracking just work. No admin headaches.", name: "Dr. Imran Khan", role: "Head of Data Science · BITS Pilani" },
+  { quote: "My Impact Score gave my CV a story numbers alone never could. Recruiters notice it.", name: "Dr. Ananya Gupta", role: "Assistant Professor · NIMHANS" },
 ];
 
 export default function TestimonialsContent() {

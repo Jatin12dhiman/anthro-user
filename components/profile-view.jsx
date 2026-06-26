@@ -2,28 +2,60 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProfileEditor from "@/components/profile-editor";
 import { useAuth } from "@/context/auth-context";
+import api from "@/lib/api";
 
-/* 8 named tabs corresponding to PRD core modules */
+/* Profile tabs — `slug` drives the URL (/profile/:username/:slug), `key` drives
+   the panel switch. Overview maps to the bare /profile/:username URL. */
 const TABS = [
-  { key: "overview", label: "Overview", icon: IconUser },
-  { key: "blogs", label: "Blogging", icon: IconPen },
-  { key: "mentoring", label: "Mentoring", icon: IconUsers },
-  { key: "projects", label: "Projects", icon: IconFlask },
-  { key: "transform", label: "Transformations", icon: IconLayers },
-  { key: "competitions", label: "Competitions", icon: IconTrophy },
+  { key: "overview", slug: "overview", label: "Overview", icon: IconUser },
+  { key: "blogs", slug: "blogs", label: "Blogs", icon: IconPen },
+  { key: "mentoring", slug: "mentoring", label: "Mentoring", icon: IconUsers },
+  { key: "projects", slug: "projects", label: "Projects", icon: IconFlask },
+  { key: "transform", slug: "transformations", label: "Transformations", icon: IconLayers },
+  { key: "competitions", slug: "competitions", label: "Competitions", icon: IconTrophy },
 ];
 
-export default function ProfileView({ data, initialEditMode = false }) {
+export default function ProfileView({ data, initialEditMode = false, tabSlug = "overview" }) {
   const { profile: p, hidden = [] } = data;
   const { user, loading, logout } = useAuth();
   // Check ownership on client using AuthContext
   const isOwner = !!user && user.profile_username === p.username;
-  const [tab, setTab] = useState("overview");
-  const [askOpen, setAskOpen] = useState(false);
+  // Active tab comes from the URL slug (falls back to Overview on unknown slugs)
+  const tab = (TABS.find((t) => t.slug === tabSlug) ?? TABS[0]).key;
   const [editMode, setEditMode] = useState(initialEditMode);
+
+  const [blogs, setBlogs] = useState([]);
+  const [blogsLoading, setBlogsLoading] = useState(false);
+
+  useEffect(() => {
+    if (tab !== "blogs") return;
+    let alive = true;
+    setBlogsLoading(true);
+    const authorId = p.user_id?._id || p.user_id;
+    const endpoint = isOwner ? "/blogs?mine=true" : `/blogs?author=${authorId}`;
+    
+    api.get(endpoint)
+      .then((res) => {
+        if (alive) {
+          setBlogs(res.blogs || []);
+          setBlogsLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load profile blogs:", err);
+        if (alive) {
+          setBlogs([]);
+          setBlogsLoading(false);
+        }
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [tab, isOwner, p.user_id?._id || p.user_id]);
 
   const isHidden = (key) => hidden.includes(key);
 
@@ -60,14 +92,7 @@ export default function ProfileView({ data, initialEditMode = false }) {
                 Sign out
               </button>
             </div>
-          ) : (
-            <Link
-              href="/login"
-              className="rounded-full border border-lagoon/15 px-4 py-1.5 text-sm font-semibold text-lagoon-900 transition-colors hover:bg-frost-50"
-            >
-              Sign in
-            </Link>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -95,25 +120,16 @@ export default function ProfileView({ data, initialEditMode = false }) {
                     Edit profile
                   </button>
                 ) : (
-                  <>
-                    {p.cv_url && (
-                      <a
-                        href={p.cv_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-full bg-marigold px-4 py-2 text-sm font-semibold text-lagoon-900 transition-transform hover:-translate-y-0.5"
-                      >
-                        Download CV
-                      </a>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setAskOpen((v) => !v)}
-                      className="rounded-full border border-lagoon/15 px-4 py-2 text-sm font-semibold text-lagoon-900 transition-colors hover:bg-frost-50"
+                  p.cv_url && (
+                    <a
+                      href={p.cv_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full bg-marigold px-4 py-2 text-sm font-semibold text-lagoon-900 transition-transform hover:-translate-y-0.5"
                     >
-                      💬 Ask AI
-                    </button>
-                  </>
+                      Download CV
+                    </a>
+                  )
                 )}
               </div>
             </div>
@@ -150,23 +166,22 @@ export default function ProfileView({ data, initialEditMode = false }) {
           </div>
         </header>
 
-        {askOpen && (
-          <div className="mt-6 rounded-2xl border border-moss/20 bg-moss/5 p-5 text-sm text-lagoon/75">
-            🤖 The profile AI assistant (answers questions from {p.display_name}&apos;s
-            content) is coming soon.
-          </div>
-        )}
+
 
         {/* ---------- TAB BAR ---------- */}
         <nav className="mt-9 flex gap-1 border-b border-lagoon/10 overflow-x-auto scrollbar-hide whitespace-nowrap pb-1 sm:gap-2">
           {TABS.map((t) => {
             const Icon = t.icon;
             const active = tab === t.key;
+            const href =
+              t.key === "overview"
+                ? `/profile/${p.username}`
+                : `/profile/${p.username}/${t.slug}`;
             return (
-              <button
+              <Link
                 key={t.key}
-                type="button"
-                onClick={() => setTab(t.key)}
+                href={href}
+                scroll={false}
                 className={`flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-xs font-semibold transition-colors sm:text-sm ${
                   active
                     ? "border-marigold text-lagoon-900"
@@ -178,7 +193,7 @@ export default function ProfileView({ data, initialEditMode = false }) {
                   {t.label}
                   {isHidden(t.key) && <IconLock />}
                 </span>
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -188,7 +203,13 @@ export default function ProfileView({ data, initialEditMode = false }) {
           {isHidden(tab) ? (
             <Empty icon="🔒" title="This section is private" hint="Only the owner can view it." />
           ) : (
-            <TabPanel tab={tab} p={p} />
+            <TabPanel
+              tab={tab}
+              p={p}
+              isOwner={isOwner}
+              blogs={blogs}
+              blogsLoading={blogsLoading}
+            />
           )}
         </section>
       </div>
@@ -196,7 +217,7 @@ export default function ProfileView({ data, initialEditMode = false }) {
   );
 }
 
-function TabPanel({ tab, p }) {
+function TabPanel({ tab, p, isOwner, blogs, blogsLoading }) {
   if (tab === "overview") {
     return (
       <div className="space-y-8">
@@ -355,36 +376,126 @@ function TabPanel({ tab, p }) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <SectionLabel>Your published blogs & drafts</SectionLabel>
-          <Link href="/login" className="rounded-full bg-lagoon-900 px-4 py-1.5 text-xs font-semibold text-frost-50 hover:bg-lagoon">
-            + Write new blog
-          </Link>
+          <SectionLabel>
+            {isOwner ? "Your published blogs & drafts" : `${p.display_name}'s publications`}
+          </SectionLabel>
+          {isOwner && (
+            <Link
+              href={`/profile/${p.username}/write`}
+              className="rounded-full bg-lagoon-900 px-4 py-1.5 text-xs font-semibold text-frost-50 hover:bg-lagoon transition-all"
+            >
+              + Write new blog
+            </Link>
+          )}
         </div>
-        <div className="grid gap-4">
-          <div className="rounded-2xl border border-[#e4dccb] bg-white p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <p className="font-display text-lg font-semibold text-lagoon-900">How AI is Revolutionising Medical Imaging Diagnostics in India</p>
-              <p className="text-xs text-lagoon/45 mt-1">Status: <span className="text-moss font-semibold">Published</span> · 12 June 2026 · 142 Likes</p>
-            </div>
-            <span className="rounded-full bg-moss/10 px-3 py-1 text-xs font-semibold text-moss">Published</span>
-          </div>
 
-          <div className="rounded-2xl border border-[#e4dccb] bg-white p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <p className="font-display text-lg font-semibold text-lagoon-900">Decarbonising India&apos;s Cement Industry: A Systems Perspective</p>
-              <p className="text-xs text-lagoon/45 mt-1">Status: <span className="text-marigold font-semibold">Under Review</span> · Plagiarism Index: <span className="text-moss font-semibold">4.8% (Approved)</span></p>
-            </div>
-            <span className="rounded-full bg-marigold/20 px-3 py-1 text-xs font-semibold text-walnut">Under Review</span>
+        {blogsLoading ? (
+          <div className="space-y-4">
+            <div className="h-20 w-full animate-pulse rounded-2xl bg-lagoon/8" />
+            <div className="h-20 w-full animate-pulse rounded-2xl bg-lagoon/8" />
           </div>
+        ) : blogs.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-lagoon/15 p-8 text-center bg-white">
+            <p className="text-sm text-lagoon/40 font-semibold">
+              {isOwner ? "You haven't written any blogs yet." : "No published blogs found."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {blogs.map((b) => {
+              const isDraft = b.status === "draft";
+              const isSubmitted = b.status === "submitted";
+              const isUnderReview = b.status === "under_review";
+              const isPublished = b.status === "published";
+              const isRevision = b.status === "revision_requested";
+              const isRejected = b.status === "rejected";
 
-          <div className="rounded-2xl border border-dashed border-lagoon/15 bg-white p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <p className="font-display text-lg font-semibold text-lagoon-900 text-lagoon/45">Somatic gene therapy regulations in Indian healthcare</p>
-              <p className="text-xs text-lagoon/35 mt-1">Status: <span className="font-semibold">Draft</span> · Auto-saved 3 minutes ago</p>
-            </div>
-            <span className="rounded-full bg-lagoon/5 px-3 py-1 text-xs font-semibold text-lagoon/50">Draft</span>
+              return (
+                <div
+                  key={b.id}
+                  className={`rounded-xl border bg-white p-4 flex gap-4 items-center justify-between ${
+                    isDraft ? "border-dashed border-lagoon/15" : "border-[#e4dccb]"
+                  }`}
+                >
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                    {/* Small thumbnail image linked to slug */}
+                    <Link href={`/blog/${b.slug || b.id}`} className="shrink-0">
+                      <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-[#fafaf9] border border-[#e8e5de] flex items-center justify-center">
+                        {b.featured_image || b.image ? (
+                          <img
+                            src={b.featured_image || b.image}
+                            alt={b.title}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-lg text-lagoon/30">📝</span>
+                        )}
+                      </div>
+                    </Link>
+
+                    <div className="min-w-0 flex-1">
+                      {/* Title linked to slug */}
+                      <Link href={`/blog/${b.slug || b.id}`} className="hover:underline">
+                        <p className={`font-display text-base font-semibold text-lagoon-900 leading-snug truncate ${isDraft ? "opacity-60" : ""}`}>
+                          {b.title}
+                        </p>
+                      </Link>
+                      
+                      {/* Short 20 words preview from content/excerpt */}
+                      {(b.preview || b.excerpt) && (
+                        <p className="text-xs text-lagoon/60 mt-0.5 line-clamp-1">
+                          {b.preview || b.excerpt}
+                        </p>
+                      )}
+
+                      <p className="text-[10px] text-lagoon/45 mt-1">
+                        Status:{" "}
+                        <span
+                          className={`font-semibold ${
+                            isPublished
+                              ? "text-moss"
+                              : isSubmitted || isUnderReview
+                              ? "text-marigold"
+                              : isRevision
+                              ? "text-chestnut"
+                              : "text-lagoon/50"
+                          }`}
+                        >
+                          {b.status.replace("_", " ").toUpperCase()}
+                        </span>
+                        {b.plagiarism_score !== null && (
+                          <span> · Plagiarism: {b.plagiarism_score}%</span>
+                        )}
+                        {b.published_at && (
+                          <span> · {new Date(b.published_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 shrink-0">
+                    {isOwner && (isDraft || isRevision) && (
+                      <Link
+                        href={`/profile/${p.username}/edit/${b.id}`}
+                        className="rounded-full border border-lagoon/15 px-3 py-1 text-xs font-semibold text-lagoon hover:bg-frost-50 transition-colors"
+                      >
+                        Edit Draft
+                      </Link>
+                    )}
+                    {isPublished && (
+                      <Link
+                        href={`/blog/${b.slug}`}
+                        className="rounded-full bg-lagoon/5 px-3 py-1 text-xs font-semibold text-lagoon hover:bg-lagoon/10 transition-colors"
+                      >
+                        Read Post
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        )}
       </div>
     );
   }
