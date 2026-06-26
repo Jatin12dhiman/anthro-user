@@ -4,194 +4,83 @@ import Link from "next/link";
 import { useState } from "react";
 import PageHero from "@/components/page-hero";
 import { Calendar, Users, FlaskConical, MapPin, Clock, CheckCircle, ArrowRight, Download, Award } from "@/components/icons";
+import { PROJECTS } from "@/lib/projects-data";
 
 const STATUSES = ["All", "Open", "Upcoming", "Completed"];
 
-const PROJECTS = [
-  {
-    id: "rural-digital-health-survey-2026",
-    status: "Open",
-    field: "Public Health",
-    title: "Rural Digital Health Survey 2026",
-    description: "A multi-state longitudinal study examining digital health tool adoption in rural primary healthcare centres across Rajasthan, MP and Odisha.",
-    pm: { name: "Dr. Kavitha Rao", institution: "PHFI Delhi", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80" },
-    seats: { total: 30, remaining: 8 },
-    deadline: "30 Jul 2026",
-    duration: "3 months",
-    skills: ["Survey design", "SPSS", "Field research"],
-    certificate: true,
-    guide: "PDF + Excel templates provided",
-  },
-  {
-    id: "climate-crop-yield-mapping",
-    status: "Open",
-    field: "Environmental Science",
-    title: "Climate Change Impact on Kharif Crop Yields",
-    description: "Mapping yield anomalies in wheat and paddy across 120 districts using IMD climate data, MNCFC satellite imagery and historical APEDA datasets.",
-    pm: { name: "Rohan Mehta", institution: "IIT Bombay", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80" },
-    seats: { total: 25, remaining: 12 },
-    deadline: "15 Aug 2026",
-    duration: "2 months",
-    skills: ["GIS", "Python", "Data analysis"],
-    certificate: true,
-    guide: "Training data + GIS layers provided",
-  },
-  {
-    id: "social-media-academic-performance",
-    status: "Upcoming",
-    field: "Psychology & Education",
-    title: "Social Media Use & Academic Performance in Undergraduates",
-    description: "Cross-sectional study across 5 central universities examining TikTok/Instagram usage patterns and their correlation with CGPA and cognitive load metrics.",
-    pm: { name: "Dr. Riya Mehta", institution: "JNU", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=80&q=80" },
-    seats: { total: 20, remaining: 20 },
-    deadline: "1 Aug 2026",
-    duration: "4 months",
-    skills: ["Questionnaire design", "SPSS", "Qualitative analysis"],
-    certificate: true,
-    guide: "Survey instrument provided",
-  },
-  {
-    id: "biodiversity-index-western-ghats",
-    status: "Open",
-    field: "Ecology",
-    title: "Biodiversity Index Mapping — Western Ghats Corridors",
-    description: "Camera-trap and transect data collection across 3 forest divisions in Maharashtra to compute species richness and Shannon diversity indices.",
-    pm: { name: "Dr. Arjun Patel", institution: "IISER Pune", avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=80&q=80" },
-    seats: { total: 15, remaining: 3 },
-    deadline: "20 Jul 2026",
-    duration: "6 months",
-    skills: ["Field ecology", "R", "Camera trap analysis"],
-    certificate: true,
-    guide: "Field manual + species checklist",
-  },
-  {
-    id: "air-quality-iot-delhi-ncr",
-    status: "Completed",
-    field: "Environmental Engineering",
-    title: "IoT-Based Air Quality Monitoring — Delhi NCR 2025",
-    description: "Deployed 40 low-cost IoT PM2.5 sensors across Delhi-NCR over 6 months. Dataset published on Zenodo; 3 papers under review.",
-    pm: { name: "Dr. Pooja Verma", institution: "IISc Bangalore", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=80&q=80" },
-    seats: { total: 20, remaining: 0 },
-    deadline: "Completed Jan 2026",
-    duration: "6 months",
-    skills: ["IoT", "Python", "Air quality modelling"],
-    certificate: true,
-    guide: null,
-  },
-];
-
 const STATUS_STYLE = {
-  Open:      "bg-moss/12 text-moss-600",
-  Upcoming:  "bg-marigold/20 text-walnut",
+  Open: "bg-moss/12 text-moss-600",
+  Upcoming: "bg-marigold/20 text-walnut",
   Completed: "bg-lagoon/10 text-lagoon",
 };
 
 const FIELD_COLORS = ["bg-lagoon/8 text-lagoon", "bg-moss/8 text-moss", "bg-chestnut/8 text-chestnut", "bg-sandstone/20 text-walnut"];
 
-function SeatBar({ total, remaining }) {
-  const pct = ((total - remaining) / total) * 100;
-  const isLow = remaining <= 5 && remaining > 0;
-  return (
-    <div>
-      <div className="mb-1 flex justify-between text-[11px]">
-        <span className={isLow ? "font-semibold text-chestnut" : "text-lagoon/50"}>
-          {remaining === 0 ? "Full" : isLow ? `Only ${remaining} left!` : `${remaining} seats open`}
-        </span>
-        <span className="text-lagoon/35">{total - remaining}/{total} enrolled</span>
-      </div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-lagoon/8">
-        <div
-          className={`h-full rounded-full transition-all ${pct >= 90 ? "bg-chestnut" : pct >= 60 ? "bg-marigold-600" : "bg-moss"}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
 function ProjectCard({ project, idx }) {
   const fieldColor = FIELD_COLORS[idx % FIELD_COLORS.length];
-  const isCompleted = project.status === "Completed";
-  const isUpcoming = project.status === "Upcoming";
 
   return (
-    <div className="flex flex-col rounded-2xl border border-[#e4dccb] bg-white shadow-[0_8px_32px_-16px_rgba(18,39,52,0.1)] transition-shadow hover:shadow-[0_20px_40px_-16px_rgba(18,39,52,0.18)]">
-      <div className="flex items-start justify-between gap-3 p-6 pb-0">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${STATUS_STYLE[project.status]}`}>
+    <Link
+      href={`/projects/${project.id}`}
+      className="group flex flex-col justify-between rounded-xl border border-lagoon/10 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1.5 hover:border-moss/30 hover:shadow-[0_16px_40px_rgba(29,59,79,0.1)]"
+    >
+      <div>
+        {/* Top row: tags and cert */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] ${STATUS_STYLE[project.status]}`}>
+              <span className="relative flex h-1.5 w-1.5">
+                {project.status === "Open" && (
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75"></span>
+                )}
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-current"></span>
+              </span>
               {project.status}
             </span>
-            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium ${fieldColor}`}>
+            <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] ${fieldColor}`}>
               {project.field}
             </span>
           </div>
-          <h3 className="font-display text-xl font-semibold leading-snug tracking-tight text-lagoon-900">
+          {project.certificate && (
+            <span className="shrink-0 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-marigold-600">
+              <Award className="h-3.5 w-3.5" />Cert
+            </span>
+          )}
+        </div>
+
+        {/* Title & description */}
+        <div className="mt-4">
+          <h3 className="font-display text-xl font-semibold leading-snug tracking-tight text-lagoon-900 transition-colors duration-200 group-hover:text-moss">
             {project.title}
           </h3>
+          <p className="mt-2 text-sm leading-relaxed text-lagoon/60 line-clamp-3">
+            {project.description}
+          </p>
         </div>
-        {project.certificate && (
-          <span className="shrink-0 flex items-center gap-1 rounded-xl bg-marigold/15 px-2.5 py-1 text-[10px] font-semibold text-walnut">
-            <Award className="h-3.5 w-3.5" />Cert
+      </div>
+
+      {/* Footer row: PM Info & CTA link */}
+      <div className="mt-6 flex items-center justify-between border-t border-lagoon/5 pt-4">
+        {/* PM info (Clean minimalist style) */}
+        <div className="flex items-center gap-2.5">
+          <div className="relative h-8 w-8 overflow-hidden rounded-full ring-2 ring-frost-100 transition-transform duration-300 group-hover:scale-105">
+            <Image src={project.pm.avatar} alt={project.pm.name} fill sizes="32px" className="object-cover" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold text-lagoon-900 leading-none">{project.pm.name}</p>
+            <p className="truncate text-[9px] text-lagoon/45 mt-1">{project.pm.institution}</p>
+          </div>
+        </div>
+
+        {/* CTA link indicator */}
+        <div className="flex items-center gap-1 text-xs font-semibold text-moss transition-colors group-hover:text-lagoon-900">
+          <span className="opacity-0 translate-x-[-4px] transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">
+            View details
           </span>
-        )}
-      </div>
-
-      <div className="px-6 pt-3">
-        <p className="text-sm leading-relaxed text-lagoon/60">{project.description}</p>
-      </div>
-
-      {/* PM info */}
-      <div className="mx-6 mt-4 flex items-center gap-2.5 rounded-xl bg-frost-100/60 p-3">
-        <div className="relative h-8 w-8 overflow-hidden rounded-full ring-2 ring-frost-100">
-          <Image src={project.pm.avatar} alt={project.pm.name} fill sizes="32px" className="object-cover" />
-        </div>
-        <div>
-          <p className="text-xs font-semibold text-lagoon-900">{project.pm.name}</p>
-          <p className="text-[10px] text-lagoon/45">Project Manager · {project.pm.institution}</p>
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
         </div>
       </div>
-
-      {/* Meta */}
-      <div className="mx-6 mt-4 grid grid-cols-2 gap-3 text-xs text-lagoon/55">
-        <div className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />Deadline: {project.deadline}</div>
-        <div className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />Duration: {project.duration}</div>
-      </div>
-
-      {/* Skills */}
-      <div className="mx-6 mt-3 flex flex-wrap gap-1.5">
-        {project.skills.map((s) => (
-          <span key={s} className="rounded-full border border-[#e4dccb] px-2.5 py-0.5 text-[11px] text-lagoon/50">{s}</span>
-        ))}
-      </div>
-
-      {/* Guide info */}
-      {project.guide && (
-        <div className="mx-6 mt-3 flex items-center gap-1.5 text-[11px] text-moss-600">
-          <Download className="h-3.5 w-3.5" />{project.guide}
-        </div>
-      )}
-
-      {/* Seat bar + CTA */}
-      <div className="mt-4 border-t border-[#e4dccb] p-6 pt-4">
-        {!isCompleted && <SeatBar total={project.seats.total} remaining={project.seats.remaining} />}
-        <Link
-          href={isCompleted ? "#" : "/login"}
-          className={`mt-4 flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold transition-all ${
-            isCompleted
-              ? "bg-lagoon/6 text-lagoon/35 cursor-default"
-              : isUpcoming
-              ? "border border-lagoon-900 text-lagoon-900 hover:bg-lagoon-900 hover:text-frost-50"
-              : project.seats.remaining === 0
-              ? "bg-lagoon/6 text-lagoon/35 cursor-not-allowed"
-              : "bg-lagoon-900 text-frost-50 hover:bg-lagoon shadow-[0_8px_24px_-10px_rgba(18,39,52,0.4)]"
-          }`}
-        >
-          {isCompleted ? "Project closed" : isUpcoming ? "Notify me when open" : project.seats.remaining === 0 ? "Join waitlist" : "Apply to join"}
-          {!isCompleted && <ArrowRight className="h-4 w-4" />}
-        </Link>
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -244,7 +133,7 @@ export default function ProjectsListing() {
                 <button
                   key={s}
                   onClick={() => setStatus(s)}
-                  className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
+                  className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                     status === s
                       ? "bg-lagoon-900 text-frost-50"
                       : "border border-[#e4dccb] bg-white text-lagoon/55 hover:border-lagoon/30"
